@@ -224,9 +224,10 @@ public:
 	void CreateCube(float	fSize);
 	void CreateCuboid(float	fSizeX, float fSizeY, float	fSizeZ);
 	void CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick);
+	void CreateOval(float fRadius, float len, float fHeight);
 };
 
-
+//Tạo hình lập phương
 void Mesh::CreateCube(float	fSize)
 {
 	int i;
@@ -394,7 +395,7 @@ void Mesh::DrawColor()
 		glEnd();
 	}
 }
-
+//Tạo hình hộp chữ nhật
 void Mesh::CreateCuboid(float	fSizeX, float fSizeY, float	fSizeZ){
 	numVerts = 8;
 	float x = fSizeX/2;
@@ -441,36 +442,32 @@ void Mesh::CreateCuboid(float	fSizeX, float fSizeY, float	fSizeZ){
 
 	}
 }
+//Set tọa đô
+void setPtInCubeHole(Point3* pt,int lan,float x, float y, float z){
+	pt[0+lan].set(-x, y, z);
+	pt[1+lan].set(x, y, z);
+	pt[2+lan].set(x, y, -z);
+	pt[3+lan].set(-x, y, -z);
+	pt[4+lan].set(-x, -y, z);
+	pt[5+lan].set(x, -y, z);
+	pt[6+lan].set(x, -y, -z);
+	pt[7+lan].set(-x, -y, -z);
+}
+//Tạo hình hộp chữ nhật có lỗ ở giữa
 void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick)
 {
-	int i, j = 0;
-	numVerts = 8 * 2;
+
+	numVerts = 16;
 	pt = new Point3[numVerts];
-	pt[0].set(-fSizeX, fSizeY, fSizeZ);
-	pt[1].set(fSizeX, fSizeY, fSizeZ);
-	pt[2].set(fSizeX, fSizeY, -fSizeZ);
-	pt[3].set(-fSizeX, fSizeY, -fSizeZ);
-	pt[4].set(-fSizeX, -fSizeY, fSizeZ);
-	pt[5].set(fSizeX, -fSizeY, fSizeZ);
-	pt[6].set(fSizeX, -fSizeY, -fSizeZ);
-	pt[7].set(-fSizeX, -fSizeY, -fSizeZ);
-	float neX, neY, neZ;
-	neX = fSizeX - fThick;
-	neY = fSizeY;
-	neZ = fSizeZ - fThick;
-	pt[8].set(-neX, neY, neZ);
-	pt[9].set(neX, neY, neZ);
-	pt[10].set(neX, neY, -neZ);
-	pt[11].set(-neX, neY, -neZ);
-	pt[12].set(-neX, -neY, neZ);
-	pt[13].set(neX, -neY, neZ);
-	pt[14].set(neX, -neY, -neZ);
-	pt[15].set(-neX, -neY, -neZ);
+	
+	setPtInCubeHole(pt,0,fSizeX,fSizeY,fSizeZ);
+	setPtInCubeHole(pt,8,fSizeX-fThick,fSizeY,fSizeZ-fThick);
 
 
 	numFaces = 16;
 	face = new Face[numFaces];
 
+	int i;
 	//Left face
 	face[0].nVerts = 4;
 	face[0].vert = new VertexID[face[0].nVerts];
@@ -478,9 +475,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[0].vert[1].vertIndex = 5;
 	face[0].vert[2].vertIndex = 6;
 	face[0].vert[3].vertIndex = 2;
-	for (i = 0; i<face[0].nVerts; i++)
-		face[0].vert[i].colorIndex = 0;
-
+	
 	//Right face
 	face[1].nVerts = 4;
 	face[1].vert = new VertexID[face[1].nVerts];
@@ -488,8 +483,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[1].vert[1].vertIndex = 3;
 	face[1].vert[2].vertIndex = 7;
 	face[1].vert[3].vertIndex = 4;
-	for (i = 0; i<face[1].nVerts; i++)
-		face[1].vert[i].colorIndex = 1;
+	
 
 	//top face left
 	face[2].nVerts = 4;
@@ -498,8 +492,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[2].vert[1].vertIndex = 1;
 	face[2].vert[2].vertIndex = 9;
 	face[2].vert[3].vertIndex = 8;
-	for (i = 0; i<face[2].nVerts; i++)
-		face[2].vert[i].colorIndex = 2;
+	
 
 	//top face right
 	face[3].nVerts = 4;
@@ -508,8 +501,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[3].vert[1].vertIndex = 3;
 	face[3].vert[2].vertIndex = 11;
 	face[3].vert[3].vertIndex = 10;
-	for (i = 0; i<face[3].nVerts; i++)
-		face[3].vert[i].colorIndex = 3;
+	
 
 	//near face
 	face[4].nVerts = 4;
@@ -518,8 +510,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[4].vert[1].vertIndex = 5;
 	face[4].vert[2].vertIndex = 1;
 	face[4].vert[3].vertIndex = 0;
-	for (i = 0; i<face[4].nVerts; i++)
-		face[4].vert[i].colorIndex = 4;
+	
 
 	//Far face
 	face[5].nVerts = 4;
@@ -528,8 +519,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[5].vert[1].vertIndex = 2;
 	face[5].vert[2].vertIndex = 6;
 	face[5].vert[3].vertIndex = 7;
-	for (i = 0; i<face[5].nVerts; i++)
-		face[5].vert[i].colorIndex = 5;
+	
 	//------------
 	//top face top
 	face[6].nVerts = 4;
@@ -538,8 +528,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[6].vert[1].vertIndex = 3;
 	face[6].vert[2].vertIndex = 11;
 	face[6].vert[3].vertIndex = 8;
-	for (i = 0; i<face[6].nVerts; i++)
-		face[6].vert[i].colorIndex = 6;
+	
 	//top face bottom
 	face[7].nVerts = 4;
 	face[7].vert = new VertexID[face[7].nVerts];
@@ -547,8 +536,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[7].vert[1].vertIndex = 2;
 	face[7].vert[2].vertIndex = 10;
 	face[7].vert[3].vertIndex = 9;
-	for (i = 0; i<face[7].nVerts; i++)
-		face[7].vert[i].colorIndex = 7;
+	
 	int n = 8;
 	//bottom face left
 	face[n].nVerts = 4;
@@ -557,8 +545,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 5;
 	face[n].vert[2].vertIndex = 13;
 	face[n].vert[3].vertIndex = 12;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
 	//bottom face right
 	n = 9;
 	face[n].nVerts = 4;
@@ -567,8 +554,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 6;
 	face[n].vert[2].vertIndex = 14;
 	face[n].vert[3].vertIndex = 15;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
 	//bottom face top
 	n = 10;
 	face[n].nVerts = 4;
@@ -577,8 +563,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 7;
 	face[n].vert[2].vertIndex = 15;
 	face[n].vert[3].vertIndex = 12;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
 	//bottom face bottom
 	n = 11;
 	face[n].nVerts = 4;
@@ -587,8 +572,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 6;
 	face[n].vert[2].vertIndex = 14;
 	face[n].vert[3].vertIndex = 13;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
 
 	//inner left
 	n = 12;
@@ -598,8 +582,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 9;
 	face[n].vert[2].vertIndex = 13;
 	face[n].vert[3].vertIndex = 12;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
 	//inner right
 	n = 13;
 	face[n].nVerts = 4;
@@ -608,8 +591,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 10;
 	face[n].vert[2].vertIndex = 14;
 	face[n].vert[3].vertIndex = 15;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
 	//inner top
 	n = 14;
 	face[n].nVerts = 4;
@@ -618,8 +600,7 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 11;
 	face[n].vert[2].vertIndex = 15;
 	face[n].vert[3].vertIndex = 12;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
 	//inner bottom
 	n = 15;
 	face[n].nVerts = 4;
@@ -628,11 +609,94 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 	face[n].vert[1].vertIndex = 10;
 	face[n].vert[2].vertIndex = 14;
 	face[n].vert[3].vertIndex = 13;
-	for (i = 0; i<face[n].nVerts; i++)
-		face[n].vert[i].colorIndex = n;
+	
+		//Set mau
+	for (int j =0;j<numFaces;j++){
+
+		for (int i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j;
+
+	}
 
 }
+//Tạo hình oval
+void Mesh::CreateOval(float fRadius, float len, float fHeight){
+	int nSegment = 180 / 5;
+	GLfloat angle = PI / nSegment;
+	numVerts = 4 * nSegment;
+	int i = 0;
+	pt = new Point3[numVerts];
+	for (i = 0; i < 4 * nSegment; i++) {
+		if (i < nSegment)pt[i].set(fRadius *cos(i*angle + PI / 2) - len / 2, fHeight / 2, fRadius*sin(i*angle + PI / 2));
+		else if (i < 2 * nSegment) pt[i].set(fRadius *cos(i*angle + PI + PI / 2) - len / 2, -fHeight / 2, fRadius*sin(i*angle + PI + PI / 2));
+		else if (i < 3 * nSegment) pt[i].set(fRadius *cos(i*angle + PI + PI / 2) + len / 2, fHeight / 2, fRadius*sin(i*angle + PI + PI / 2));
+		else  pt[i].set(fRadius *cos(i*angle + PI / 2) + len / 2, -fHeight / 2, fRadius*sin(i*angle + PI / 2));
+	}
 
+	numFaces = 2 * nSegment + 3;
+	face = new Face[numFaces];
+	int j = 0;
+	int k = 0;
+
+	//the surround Faces
+	for (j = 0; j < nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j;
+		face[j].vert[1].vertIndex = j + 1;
+		face[j].vert[2].vertIndex = j + nSegment + 1;
+		face[j].vert[3].vertIndex = j + nSegment;
+		for (i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j + i - nSegment;
+	}
+	//the surround Faces
+	for (j = nSegment; j < 2 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j + nSegment;
+		face[j].vert[1].vertIndex = j + nSegment + 1;
+		face[j].vert[2].vertIndex = j + 2 * nSegment + 1;
+		face[j].vert[3].vertIndex = j + 2 * nSegment;
+		for (i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j + i - nSegment;
+	}
+	//left
+	face[2 * nSegment - 1].nVerts = 4;
+	face[2 * nSegment - 1].vert = new VertexID[face[2 * nSegment - 1].nVerts];
+	face[2 * nSegment - 1].vert[0].vertIndex = 0;
+	face[2 * nSegment - 1].vert[1].vertIndex = nSegment;
+	face[2 * nSegment - 1].vert[3].vertIndex = 3 * nSegment - 1;
+	face[2 * nSegment - 1].vert[2].vertIndex = 4 * nSegment - 1;
+	for (i = 0; i<face[2 * nSegment - 1].nVerts; i++)
+		face[2 * nSegment - 1].vert[i].colorIndex = 2;
+	//right
+	face[2 * nSegment].nVerts = 4;
+	face[2 * nSegment].vert = new VertexID[face[2 * nSegment].nVerts];
+	face[2 * nSegment].vert[0].vertIndex = nSegment - 1;
+	face[2 * nSegment].vert[1].vertIndex = 2 * nSegment - 1;
+	face[2 * nSegment].vert[3].vertIndex = 2 * nSegment;
+	face[2 * nSegment].vert[2].vertIndex = 3 * nSegment;
+	for (i = 0; i<face[2 * nSegment].nVerts; i++)
+		face[2 * nSegment].vert[i].colorIndex = 2;
+	//top
+	face[2 * nSegment + 1].nVerts = 2 * nSegment;
+	face[2 * nSegment + 1].vert = new VertexID[face[2 * nSegment + 1].nVerts];
+	for (i = 0; i < 2 * nSegment; i++) {
+		if (i < nSegment)face[2 * nSegment + 1].vert[i].vertIndex = i;
+		else face[2 * nSegment + 1].vert[i].vertIndex = i + nSegment;
+	}
+	for (i = 0; i < face[2 * nSegment + 1].nVerts; i++)
+		face[2 * nSegment + 1].vert[i].colorIndex = 2;
+	//bottom
+	face[2 * nSegment + 2].nVerts = 2 * nSegment;
+	face[2 * nSegment + 2].vert = new VertexID[face[2 * nSegment + 2].nVerts];
+	for (i = 0; i < 2 * nSegment; i++) {
+		if (i < nSegment)face[2 * nSegment + 2].vert[i].vertIndex = i + nSegment;
+		else face[2 * nSegment + 2].vert[i].vertIndex = i + nSegment * 2;
+	}
+	for (i = 0; i < face[2 * nSegment + 2].nVerts; i++)
+		face[2 * nSegment + 2].vert[i].colorIndex = 3;
+}
 
 //Code main
 //-------------------------------------------------------------------------------------
@@ -754,10 +818,10 @@ int main(int argc, char* argv[])
 	tetrahedron.CreateTetrahedron();
 	cube.CreateCube(1);
 	cuboid.CreateCuboid(2, 0.8, 0.8);
-	/*cylinder.CreateCylinder(20, 3, 1);
-	holecuboid.CreateCuboidHole(2, 0.8, 0.8, 0.35);
+	//cylinder.CreateCylinder(20, 3, 1);
+	holecuboid.CreateCubeHole(2, 0.8, 0.8, 0.35);
 	oval.CreateOval(2, 2, 0.8);
-	holeoval.CreateHoleOval(2, 2, 0.8, 1);*/
+//	holeoval.CreateHoleOval(2, 2, 0.8, 1);*/
 	myInit();
     glutDisplayFunc(myDisplay);
 	glutTimerFunc(25, processTimer, 1);
