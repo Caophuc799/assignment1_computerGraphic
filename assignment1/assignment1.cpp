@@ -15,13 +15,16 @@
 //----------------------------------------------------------------------------------------------
 #define PI			3.1415926
 #define	COLORNUM		14
+#define DEG2RAD	3.141592/180.0f
 
 
-float	ColorArr[COLORNUM][3] = {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, { 0.0,  0.0, 1.0}, 
-								{1.0, 1.0,  0.0}, { 1.0, 0.0, 1.0},{ 0.0, 1.0, 1.0}, 
-								 {0.3, 0.3, 0.3}, {0.5, 0.5, 0.5}, { 0.9,  0.9, 0.9},
-								{1.0, 0.5,  0.5}, { 0.5, 1.0, 0.5},{ 0.5, 0.5, 1.0},
-									{0.0, 0.0, 0.0}, {1.0, 1.0, 1.0}};
+
+
+float	ColorArr[COLORNUM][3] = { { 1.0, 0.0, 0.0 },{ 0.0, 1.0, 0.0 },{ 0.0,  0.0, 1.0 },
+{ 1.0, 1.0,  0.0 },{ 1.0, 0.0, 1.0 },{ 0.0, 1.0, 1.0 },
+{ 0.3, 0.3, 0.3 },{ 0.5, 0.5, 0.5 },{ 0.9,  0.9, 0.9 },
+{ 1.0, 0.5,  0.5 },{ 0.5, 1.0, 0.5 },{ 0.5, 0.5, 1.0 },
+{ 0.0, 0.0, 0.0 },{ 0.9, 0.8, 1.0 } };
 
 
 
@@ -196,6 +199,10 @@ public:
 	
 	int		numFaces;
 	Face*		face;
+	float		slideX, slideY, slideZ;
+	float		rotateX, rotateY, rotateZ;
+	float		scaleX, scaleY, scaleZ;
+
 public:
 	Mesh()
 	{
@@ -224,7 +231,11 @@ public:
 	void CreateCube(float	fSize);
 	void CreateCuboid(float	fSizeX, float fSizeY, float	fSizeZ);
 	void CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick);
-	void CreateOval(float fRadius, float len, float fHeight);
+	void CreateOvan(float fRadius, float len, float fHeight);
+	void CreateOvanHole(float fRadius, float len, float fHeight, float fradius);
+	void CreateCylindrical (int nSegment, float fHeight, float fRadius);
+	void SetColor(int colorIdx);
+
 };
 
 //Tạo hình lập phương
@@ -387,7 +398,7 @@ void Mesh::DrawColor()
 			int		iv = face[f].vert[v].vertIndex;
 			int		ic = face[f].vert[v].colorIndex;
 			
-			ic = f % COLORNUM;
+			//ic = f % COLORNUM;
 
 			glColor3f(ColorArr[ic][0], ColorArr[ic][1], ColorArr[ic][2]); 
 			glVertex3f(pt[iv].x, pt[iv].y, pt[iv].z);
@@ -395,6 +406,16 @@ void Mesh::DrawColor()
 		glEnd();
 	}
 }
+//Set color
+
+void Mesh::SetColor(int colorIdx) {
+	for (int f = 0; f < numFaces; f++) {
+		for (int v = 0; v < face[f].nVerts; v++) {
+			face[f].vert[v].colorIndex = colorIdx;
+		}
+	}
+}
+
 //Tạo hình hộp chữ nhật
 void Mesh::CreateCuboid(float	fSizeX, float fSizeY, float	fSizeZ){
 	numVerts = 8;
@@ -620,45 +641,47 @@ void Mesh::CreateCubeHole(float fSizeX, float fSizeY, float fSizeZ, float fThick
 
 }
 //Tạo hình oval
-void Mesh::CreateOval(float fRadius, float len, float fHeight){
-	int nSegment = 180 / 5;
+void Mesh::CreateOvan (float fRadius, float len, float fHeight){
+	int nSegment = 180 / 10;
 	GLfloat angle = PI / nSegment;
 	numVerts = 4 * nSegment;
-	int i = 0;
 	pt = new Point3[numVerts];
-	for (i = 0; i < 4 * nSegment; i++) {
-		if (i < nSegment)pt[i].set(fRadius *cos(i*angle + PI / 2) - len / 2, fHeight / 2, fRadius*sin(i*angle + PI / 2));
-		else if (i < 2 * nSegment) pt[i].set(fRadius *cos(i*angle + PI + PI / 2) - len / 2, -fHeight / 2, fRadius*sin(i*angle + PI + PI / 2));
-		else if (i < 3 * nSegment) pt[i].set(fRadius *cos(i*angle + PI + PI / 2) + len / 2, fHeight / 2, fRadius*sin(i*angle + PI + PI / 2));
-		else  pt[i].set(fRadius *cos(i*angle + PI / 2) + len / 2, -fHeight / 2, fRadius*sin(i*angle + PI / 2));
-	}
-
 	numFaces = 2 * nSegment + 3;
 	face = new Face[numFaces];
-	int j = 0;
-	int k = 0;
+	//Set tọa độ đỉnh phía trên
+	for (int i = 0; i< nSegment; i++){
+		pt[i].set(fRadius *cos(i*angle + PI / 2) - len / 2, fHeight / 2, fRadius*sin(i*angle + PI / 2));
+	}
+	for (int i = nSegment; i< 2*nSegment; i++){
+		pt[i].set(fRadius *cos(i*angle + PI +PI / 2) - len / 2, -fHeight / 2, fRadius*sin(i*angle + PI +PI / 2));
+	}
+	for (int i = 2*nSegment; i< 3*nSegment; i++){
+		pt[i].set(fRadius *cos(i*angle + PI + PI / 2) + len / 2, fHeight / 2, fRadius*sin(i*angle + PI + PI / 2));
+		
+	}
+	for (int i = 3*nSegment; i< 4*nSegment; i++){
+		pt[i].set(fRadius *cos(i*angle + PI / 2) + len / 2, -fHeight / 2, fRadius*sin(i*angle +  PI / 2));
+	}
 
 	//the surround Faces
-	for (j = 0; j < nSegment - 1; j++) {
+	for (int j = 0; j < nSegment - 1; j++) {
 		face[j].nVerts = 4;
 		face[j].vert = new VertexID[face[j].nVerts];
 		face[j].vert[0].vertIndex = j;
 		face[j].vert[1].vertIndex = j + 1;
 		face[j].vert[2].vertIndex = j + nSegment + 1;
 		face[j].vert[3].vertIndex = j + nSegment;
-		for (i = 0; i<face[j].nVerts; i++)
-			face[j].vert[i].colorIndex = j + i - nSegment;
+		
 	}
 	//the surround Faces
-	for (j = nSegment; j < 2 * nSegment - 1; j++) {
+	for (int j = nSegment; j < 2 * nSegment - 1; j++) {
 		face[j].nVerts = 4;
 		face[j].vert = new VertexID[face[j].nVerts];
 		face[j].vert[0].vertIndex = j + nSegment;
 		face[j].vert[1].vertIndex = j + nSegment + 1;
 		face[j].vert[2].vertIndex = j + 2 * nSegment + 1;
 		face[j].vert[3].vertIndex = j + 2 * nSegment;
-		for (i = 0; i<face[j].nVerts; i++)
-			face[j].vert[i].colorIndex = j + i - nSegment;
+	
 	}
 	//left
 	face[2 * nSegment - 1].nVerts = 4;
@@ -667,8 +690,7 @@ void Mesh::CreateOval(float fRadius, float len, float fHeight){
 	face[2 * nSegment - 1].vert[1].vertIndex = nSegment;
 	face[2 * nSegment - 1].vert[3].vertIndex = 3 * nSegment - 1;
 	face[2 * nSegment - 1].vert[2].vertIndex = 4 * nSegment - 1;
-	for (i = 0; i<face[2 * nSegment - 1].nVerts; i++)
-		face[2 * nSegment - 1].vert[i].colorIndex = 2;
+	
 	//right
 	face[2 * nSegment].nVerts = 4;
 	face[2 * nSegment].vert = new VertexID[face[2 * nSegment].nVerts];
@@ -676,105 +698,560 @@ void Mesh::CreateOval(float fRadius, float len, float fHeight){
 	face[2 * nSegment].vert[1].vertIndex = 2 * nSegment - 1;
 	face[2 * nSegment].vert[3].vertIndex = 2 * nSegment;
 	face[2 * nSegment].vert[2].vertIndex = 3 * nSegment;
-	for (i = 0; i<face[2 * nSegment].nVerts; i++)
-		face[2 * nSegment].vert[i].colorIndex = 2;
+	
 	//top
 	face[2 * nSegment + 1].nVerts = 2 * nSegment;
 	face[2 * nSegment + 1].vert = new VertexID[face[2 * nSegment + 1].nVerts];
-	for (i = 0; i < 2 * nSegment; i++) {
+	for (int i = 0; i < 2 * nSegment; i++) {
 		if (i < nSegment)face[2 * nSegment + 1].vert[i].vertIndex = i;
 		else face[2 * nSegment + 1].vert[i].vertIndex = i + nSegment;
 	}
-	for (i = 0; i < face[2 * nSegment + 1].nVerts; i++)
-		face[2 * nSegment + 1].vert[i].colorIndex = 2;
+	
 	//bottom
 	face[2 * nSegment + 2].nVerts = 2 * nSegment;
 	face[2 * nSegment + 2].vert = new VertexID[face[2 * nSegment + 2].nVerts];
-	for (i = 0; i < 2 * nSegment; i++) {
+	for (int i = 0; i < 2 * nSegment; i++) {
 		if (i < nSegment)face[2 * nSegment + 2].vert[i].vertIndex = i + nSegment;
 		else face[2 * nSegment + 2].vert[i].vertIndex = i + nSegment * 2;
 	}
-	for (i = 0; i < face[2 * nSegment + 2].nVerts; i++)
-		face[2 * nSegment + 2].vert[i].colorIndex = 3;
+
+		//Set mau
+	for (int j =0;j<numFaces;j++){
+
+		for (int i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j;
+
+	}
+	
+}
+void Mesh::CreateOvanHole(float fRadius, float len, float fHeight, float fradius)
+{
+	int nSegment = 180 / 10;
+	GLfloat angle = PI / nSegment;
+	numVerts = 8 * nSegment;
+	pt = new Point3[numVerts];
+	numFaces = 8 * nSegment + 8;
+	face = new Face[numFaces];
+	for (int i = 0; i < 4 * nSegment; i++) {
+		if (i < nSegment)pt[i].set(fRadius *cos(i*angle + PI / 2) - len / 2, fHeight / 2, fRadius*sin(i*angle + PI / 2));
+		else if (i < 2 * nSegment) pt[i].set(fRadius *cos(i*angle + PI + PI / 2) - len / 2, -fHeight / 2, fRadius*sin(i*angle + PI + PI / 2));
+		else if (i < 3 * nSegment) pt[i].set(fRadius *cos(i*angle + PI + PI / 2) + len / 2, fHeight / 2, fRadius*sin(i*angle + PI + PI / 2));
+		else  pt[i].set(fRadius *cos(i*angle + PI / 2) + len / 2, -fHeight / 2, fRadius*sin(i*angle + PI / 2));
+	}
+	for (int i = 4 * nSegment; i < 8 * nSegment; i++) {
+		if (i < 5 * nSegment)pt[i].set(fradius *cos(i*angle + PI / 2) - len / 2, fHeight / 2, fradius*sin(i*angle + PI / 2));
+		else if (i < 6 * nSegment) pt[i].set(fradius *cos(i*angle + PI + PI / 2) - len / 2, -fHeight / 2, fradius*sin(i*angle + PI + PI / 2));
+		else if (i < 7 * nSegment) pt[i].set(fradius *cos(i*angle + PI + PI / 2) + len / 2, fHeight / 2, fradius*sin(i*angle + PI + PI / 2));
+		else  pt[i].set(fradius *cos(i*angle + PI / 2) + len / 2, -fHeight / 2, fradius*sin(i*angle + PI / 2));
+	}
+	//the surround near
+	for (int j = 0; j < nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j;
+		face[j].vert[1].vertIndex = j + 1;
+		face[j].vert[2].vertIndex = j + nSegment + 1;
+		face[j].vert[3].vertIndex = j + nSegment;
+	}
+	//top near
+	for (int j = 2 * nSegment; j < 3 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j;
+		face[j].vert[1].vertIndex = j + 1;
+		face[j].vert[2].vertIndex = j + 4 * nSegment + 1;
+		face[j].vert[3].vertIndex = j + 4 * nSegment;
+		
+	}
+	// bottom near
+	for (int j = 3 * nSegment; j < 4 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j;
+		face[j].vert[1].vertIndex = j + 1;
+		face[j].vert[2].vertIndex = j + 4 * nSegment + 1;
+		face[j].vert[3].vertIndex = j + 4 * nSegment;
+		
+	}
+	// inner near
+	for (int j = 4 * nSegment; j < 5 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j + 2 * nSegment;
+		face[j].vert[1].vertIndex = j + 2 * nSegment + 1;
+		face[j].vert[2].vertIndex = j + 3 * nSegment + 1;
+		face[j].vert[3].vertIndex = j + 3 * nSegment;
+		
+	}
+	//the surround far
+	for (int j = nSegment; j < 2 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j + nSegment;
+		face[j].vert[1].vertIndex = j + nSegment + 1;
+		face[j].vert[2].vertIndex = j + 2 * nSegment + 1;
+		face[j].vert[3].vertIndex = j + 2 * nSegment;
+		
+	}
+	// bottom far
+	for (int j = 5 * nSegment; j < 6 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j - 4 * nSegment;
+		face[j].vert[1].vertIndex = j - 4 * nSegment + 1;
+		face[j].vert[2].vertIndex = j + 1;
+		face[j].vert[3].vertIndex = j;
+		
+	}
+	// bottom far
+	for (int j = 6 * nSegment; j < 7 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j - 2 * nSegment;
+		face[j].vert[1].vertIndex = j - 2 * nSegment + 1;
+		face[j].vert[2].vertIndex = j - 6 * nSegment + 1;
+		face[j].vert[3].vertIndex = j - 6 * nSegment;
+		
+	}
+	// inner far
+	for (int j = 7 * nSegment; j < 8 * nSegment - 1; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j - 3 * nSegment;
+		face[j].vert[1].vertIndex = j - 3 * nSegment + 1;
+		face[j].vert[2].vertIndex = j - 2 * nSegment + 1;
+		face[j].vert[3].vertIndex = j - 2 * nSegment;
+		
+	}
+	//left left
+	face[8 * nSegment - 1].nVerts = 4;
+	face[8 * nSegment - 1].vert = new VertexID[face[8 * nSegment - 1].nVerts];
+	face[8 * nSegment - 1].vert[0].vertIndex = 0;
+	face[8 * nSegment - 1].vert[1].vertIndex = nSegment;
+	face[8 * nSegment - 1].vert[3].vertIndex = 3 * nSegment - 1;
+	face[8 * nSegment - 1].vert[2].vertIndex = 4 * nSegment - 1;
+	
+	//left top
+	face[8 * nSegment + 1].nVerts = 4;
+	face[8 * nSegment + 1].vert = new VertexID[face[8 * nSegment + 1].nVerts];
+	face[8 * nSegment + 1].vert[0].vertIndex = 0;
+	face[8 * nSegment + 1].vert[1].vertIndex = 4 * nSegment;
+	face[8 * nSegment + 1].vert[3].vertIndex = 3 * nSegment - 1;
+	face[8 * nSegment + 1].vert[2].vertIndex = 7 * nSegment - 1;
+	
+	//left right
+	face[8 * nSegment + 2].nVerts = 4;
+	face[8 * nSegment + 2].vert = new VertexID[face[8 * nSegment + 2].nVerts];
+	face[8 * nSegment + 2].vert[0].vertIndex = 4 * nSegment;
+	face[8 * nSegment + 2].vert[1].vertIndex = 5 * nSegment;
+	face[8 * nSegment + 2].vert[3].vertIndex = 7 * nSegment - 1;
+	face[8 * nSegment + 2].vert[2].vertIndex = 8 * nSegment - 1;
+	
+	//right right
+	face[8 * nSegment].nVerts = 4;
+	face[8 * nSegment].vert = new VertexID[face[8 * nSegment].nVerts];
+	face[8 * nSegment].vert[0].vertIndex = nSegment - 1;
+	face[8 * nSegment].vert[1].vertIndex = 2 * nSegment - 1;
+	face[8 * nSegment].vert[3].vertIndex = 2 * nSegment;
+	face[8 * nSegment].vert[2].vertIndex = 3 * nSegment;
+	
+	//right left
+	face[8 * nSegment + 3].nVerts = 4;
+	face[8 * nSegment + 3].vert = new VertexID[face[8 * nSegment + 3].nVerts];
+	face[8 * nSegment + 3].vert[0].vertIndex = 5 * nSegment - 1;
+	face[8 * nSegment + 3].vert[1].vertIndex = 6 * nSegment - 1;
+	face[8 * nSegment + 3].vert[3].vertIndex = 6 * nSegment;
+	face[8 * nSegment + 3].vert[2].vertIndex = 7 * nSegment;
+	
+	//right top
+	face[8 * nSegment + 4].nVerts = 4;
+	face[8 * nSegment + 4].vert = new VertexID[face[8 * nSegment + 4].nVerts];
+	face[8 * nSegment + 4].vert[0].vertIndex = 5 * nSegment - 1;
+	face[8 * nSegment + 4].vert[1].vertIndex = nSegment - 1;
+	face[8 * nSegment + 4].vert[3].vertIndex = 6 * nSegment;
+	face[8 * nSegment + 4].vert[2].vertIndex = 2 * nSegment;
+	
+	//left bot
+	face[8 * nSegment + 5].nVerts = 4;
+	face[8 * nSegment + 5].vert = new VertexID[face[8 * nSegment + 5].nVerts];
+	face[8 * nSegment + 5].vert[3].vertIndex = nSegment;
+	face[8 * nSegment + 5].vert[1].vertIndex = 8 * nSegment - 1;
+	face[8 * nSegment + 5].vert[2].vertIndex = 4 * nSegment - 1;
+	face[8 * nSegment + 5].vert[0].vertIndex = 5 * nSegment;
+	
+	//right bot
+	face[8 * nSegment + 6].nVerts = 4;
+	face[8 * nSegment + 6].vert = new VertexID[face[8 * nSegment + 6].nVerts];
+	face[8 * nSegment + 6].vert[0].vertIndex = 2 * nSegment - 1;
+	face[8 * nSegment + 6].vert[1].vertIndex = 3 * nSegment;
+	face[8 * nSegment + 6].vert[3].vertIndex = 6 * nSegment - 1;
+	face[8 * nSegment + 6].vert[2].vertIndex = 7 * nSegment;
+	
+	
+		//Set mau
+	for (int j =0;j<numFaces;j++){
+
+		for (int i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j;
+
+	}
+
+}
+void Mesh::CreateCylindrical (int nSegment, float fHeight, float fRadius)
+{
+	numVerts = 2 * nSegment + 2;
+	GLfloat angle = 2 * PI / nSegment;
+	pt = new Point3[numVerts];
+	//Set tọa độ đỉnh phía trên
+	for (int i = 0; i< nSegment; i++){
+		pt[i].set(fRadius *cos(i*angle), fHeight / 2, fRadius*sin(i*angle));
+	}
+	//Set tọa độ đỉnh phía dưới
+	for (int i = nSegment; i< 2 * nSegment; i++){
+		pt[i].set(fRadius *cos((i - nSegment)*angle), -fHeight / 2, fRadius*sin((i - nSegment)*angle));
+	}
+	//Set toa độ tâm
+	pt[2 * nSegment].set(0.0, fHeight / 2, 0.0);
+	pt[2 * nSegment + 1].set(0.0, -fHeight / 2, 0.0);
+
+	numFaces = 3 * nSegment;
+	face = new Face[numFaces];
+	//the top 
+	for (int j = 0; j < nSegment; j++) {
+		face[j].nVerts = 3;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j;
+		face[j].vert[1].vertIndex = 2 * nSegment;
+		if (j == nSegment - 1)
+			face[j].vert[2].vertIndex = 0;
+		else
+			face[j].vert[2].vertIndex = j + 1;
+		for (int i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j + 3 * i;
+	}
+
+	//the surround Faces
+	for (int j = nSegment; j < 2 * nSegment; j++) {
+		face[j].nVerts = 4;
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = j - nSegment;
+		if (j == 2 * nSegment - 1)
+			face[j].vert[1].vertIndex = 0;
+		else
+			face[j].vert[1].vertIndex = j - nSegment + 1;
+		if (j == 2 * nSegment - 1)
+			face[j].vert[2].vertIndex = nSegment;
+		else
+			face[j].vert[2].vertIndex = j + 1;
+		face[j].vert[3].vertIndex = j;
+		for (int i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j + i - nSegment;
+	}
+	//bottom face
+	for (int j = 2 * nSegment, k = nSegment; j < 3 * nSegment; j++, k++) {
+		face[j].nVerts = 3;
+
+		face[j].vert = new VertexID[face[j].nVerts];
+		face[j].vert[0].vertIndex = k;
+		face[j].vert[1].vertIndex = 2 * nSegment + 1;
+		if (j == 3 * nSegment - 1)
+			face[j].vert[2].vertIndex = 2 * nSegment + 1;
+		else
+			face[j].vert[2].vertIndex = k + 1;
+		for (int i = 0; i<face[j].nVerts; i++)
+			face[j].vert[i].colorIndex = j + 3 * i;
+	}
 }
 
 //Code main
 //-------------------------------------------------------------------------------------
 
 using namespace std;
-int angle = 0;
+
 int		screenWidth = 600;
-int		screenHeight= 300;
+int		screenHeight = 600;
 
-Mesh	tetrahedron;
-Mesh	cube;
-Mesh	cuboid;
-Mesh	cylinder;
-Mesh    holecuboid;
-Mesh    oval;
-Mesh    holeoval;
-int		nChoice = 1;
+bool	bWireFrame = false;
 
+float	baseRadius = 0.8;
+float	baseHeight = 0.2;
+float	baseRotateStep = 5;
+
+float	columnSizeX = 0.25;
+float	columnSizeZ = columnSizeX;
+float	columnSizeY = 5;
+
+Mesh	base;
+Mesh	column;
+Mesh	row;
+Mesh    shelftop;
+Mesh    shelfbot;
+Mesh    s_shelftop;
+Mesh    s_shelfbot;
+Mesh    rotary;
+Mesh    rotarypoint;
+Mesh    standT;
+Mesh	rightT;
+Mesh    s_standT;
+Mesh    s_rightT;
+
+void myKeyboard(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+	case '1':
+		base.rotateY += baseRotateStep;
+		if (base.rotateY > 360)
+			base.rotateY -= 360;
+		break;
+	case '2':
+		base.rotateY -= baseRotateStep;
+		if (base.rotateY < 0)
+			base.rotateY += 360;
+		break;
+	case '3':
+		rotary.rotateZ += baseRotateStep;
+		if (rotary.rotateZ > 360)
+			rotary.rotateZ -= 360;
+		break;
+	case '4':
+		rotary.rotateZ -= baseRotateStep;
+		if (rotary.rotateZ < 0)
+			rotary.rotateZ += 360;
+		break;
+	case 'R':
+	case 'r':
+		base.rotateY = 0;
+		rotary.rotateZ = 0;
+		break;
+	case 'W':
+	case 'w':
+		bWireFrame = !bWireFrame;
+		break;
+	}
+
+	glutPostRedisplay();
+}
 void drawAxis()
 {
 	glColor3f(0, 0, 1);
 	glBegin(GL_LINES);
-		glVertex3f(0, 0, 0);
-		glVertex3f(4, 0, 0);
+	glColor3f(1, 0, 0);
+	glVertex3f(0, 0, 0);//x
+	glVertex3f(4, 0, 0);
 
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 4, 0);
+	glColor3f(0, 1, 0);
+	glVertex3f(0, 0, 0);//y
+	glVertex3f(0, 4, 0);
 
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 0, 4);
+	glColor3f(0, 0, 1);
+	glVertex3f(0, 0, 0);//z
+	glVertex3f(0, 0, 4);
 	glEnd();
+}
+
+void drawBase()
+{
+	glPushMatrix();
+
+	glTranslated(0, baseHeight / 2.0, 0);
+	glRotatef(base.rotateY, 0, 1, 0);
+
+	if (bWireFrame)
+		base.DrawWireframe();
+	else
+		base.DrawColor();
+
+	glPopMatrix();
+}
+void drawColumn()
+{
+	glPushMatrix();
+
+	glTranslated(0, baseHeight / 2.0 + columnSizeY / 2, 0);
+	glRotatef(base.rotateY, 0, 1, 0);
+
+	if (bWireFrame)
+		column.DrawWireframe();
+	else
+		column.DrawColor();
+
+	glPopMatrix();
+}
+void drawRow()
+{
+	glPushMatrix();
+
+	glRotatef(base.rotateY, 0, 1, 0);
+	glTranslated(columnSizeY / 3 + columnSizeX / 2 - 0.1 * 2 / 3, columnSizeY * 3 / 10 + columnSizeX / 2, 0);
+
+	if (bWireFrame)
+		row.DrawWireframe();
+	else
+		row.DrawColor();
+
+	glPopMatrix();
+}
+void drawShelfTop() {
+	glPushMatrix();
+
+	glRotatef(base.rotateY - 90, 0, 1, 0);
+	glTranslated(columnSizeX * 1 / 3 + columnSizeX * 2 + baseHeight, columnSizeY * 11 / 16 + columnSizeX / 2, 0);
+
+	if (bWireFrame)
+		shelftop.DrawWireframe();
+	else
+		shelftop.DrawColor();
+
+	glPopMatrix();
+}
+void drawS_ShelfTop() {
+	glPushMatrix();
+	glRotatef(base.rotateY - 90, 0, 1, 0);
+	glTranslated((columnSizeX * 2 + baseHeight) / 2, columnSizeY * 11 / 16 + columnSizeX / 2, 0);
+
+	if (bWireFrame)
+		s_shelftop.DrawWireframe();
+	else
+		s_shelftop.DrawColor();
+
+	glPopMatrix();
+}
+void drawS_ShelfBot() {
+	glPushMatrix();
+	glRotatef(base.rotateY - 90, 0, 1, 0);
+	glTranslated(columnSizeZ - (columnSizeX - baseHeight) / 2, columnSizeY * 3 / 10 + columnSizeX / 2, -columnSizeY * 0.39);
+
+	if (bWireFrame)
+		s_shelfbot.DrawWireframe();
+	else
+		s_shelfbot.DrawColor();
+
+	glPopMatrix();
+}
+void drawShelfBot() {
+	glPushMatrix();
+	glRotatef(base.rotateY - 90, 0, 1, 0);
+	glTranslated(columnSizeZ + baseHeight + columnSizeZ * 1 / 3, columnSizeY * 3 / 10 + columnSizeX / 2, -columnSizeY * 0.39);
+	glRotatef(90, 1, 0, 0);
+
+	if (bWireFrame)
+		shelfbot.DrawWireframe();
+	else
+		shelfbot.DrawColor();
+
+	glPopMatrix();
+}
+void drawRotary() {
+	glPushMatrix();
+	glRotatef(base.rotateY, 0, 1, 0);
+	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) / 2 + columnSizeX / 2);
+	glRotatef(90, 1, 0, 0);
+	glRotatef(rotary.rotateZ, 0, 1, 0);		// quanh truc
+	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 10, 0, 0);
+
+	if (bWireFrame)
+		rotary.DrawWireframe();
+	else
+		rotary.DrawColor();
+
+	glPopMatrix();
+}
+void drawRotaryPoint() {
+	glPushMatrix();
+	glRotatef(base.rotateY, 0, 1, 0);
+	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX / 2 + columnSizeZ * (7.f / 3) / 2);
+	glRotatef(90, 1, 0, 0);
+	glRotatef(rotary.rotateZ, 0, 1, 0);		// quanh truc
+	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5, 0, 0);
+
+	if (bWireFrame)
+		rotarypoint.DrawWireframe();
+	else
+		rotarypoint.DrawColor();
+
+	glPopMatrix();
+}
+void drawstandT() {
+	glPushMatrix();
+	glRotatef(base.rotateY, 0, 1, 0);
+	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * sin(rotary.rotateZ*DEG2RAD) + (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX * 2);
+	glRotatef(90, 1, 0, 0);
+
+	if (bWireFrame)
+		standT.DrawWireframe();
+	else
+		standT.DrawColor();
+
+	glPopMatrix();
+}
+void drawrightT() {
+	glPushMatrix();
+	glRotatef(base.rotateY, 0, 1, 0);
+	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * cos(rotary.rotateZ*DEG2RAD), (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX);
+	glRotatef(90, 0, 0, 1);
+	glRotatef(90, 1, 0, 0);
+
+	if (bWireFrame)
+		rightT.DrawWireframe();
+	else
+		rightT.DrawColor();
+
+	glPopMatrix();
+}
+void draws_standT()
+{
+	glPushMatrix();
+	glRotatef(base.rotateY, 0, 1, 0);
+	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2) + baseHeight + (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * sin(rotary.rotateZ*DEG2RAD) + columnSizeY * 3 / 10, (columnSizeZ / 3 + baseHeight) + columnSizeX * 2);
+
+	if (bWireFrame)
+		s_standT.DrawWireframe();
+	else
+		s_standT.DrawColor();
+
+	glPopMatrix();
+}
+void draws_rightT()
+{
+	glPushMatrix();
+	glRotatef(base.rotateY, 0, 1, 0);
+	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * cos(rotary.rotateZ*DEG2RAD) + columnSizeY * 3 / 10 + baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX);
+	glRotatef(90, 0, 0, 1);
+
+	if (bWireFrame)
+		s_rightT.DrawWireframe();
+	else
+		s_rightT.DrawColor();
+
+	glPopMatrix();
 }
 void myDisplay()
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(4.5*cos(angle*3.14159f/180.f), 4, 4.5 * sin(angle*3.14159f / 180.f), 0, 0, 0, 0, 1, 0);
+	gluLookAt(6, 4, 6, 0, 1, 0, 0, 1, 0);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
-	glViewport(0, 0, screenWidth/2, screenHeight);
-	
-	drawAxis();
-
-	glColor3f(0, 0, 0);
-	if(nChoice == 1)
-		tetrahedron.DrawWireframe();
-	else if(nChoice == 2)
-		cube.DrawWireframe();
-	else if (nChoice == 3)
-		cuboid.DrawWireframe();
-	else if (nChoice == 4)
-		cylinder.DrawWireframe();
-	else if (nChoice == 5)
-		holecuboid.DrawWireframe();
-	else if (nChoice == 6)
-		oval.DrawWireframe();
-	else if (nChoice == 7)
-		holeoval.DrawWireframe();
-
-	glViewport(screenWidth/2, 0, screenWidth/2, screenHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, screenWidth, screenHeight);
 
 	drawAxis();
-	if(nChoice == 1)
-		tetrahedron.DrawColor();
-	else if(nChoice == 2)
-		cube.DrawColor();
-	else if (nChoice == 3)
-		cuboid.DrawColor();
-	else if (nChoice == 4)
-		cylinder.DrawColor();
-	else if (nChoice == 5)
-		holecuboid.DrawColor();
-	else if (nChoice == 6)
-		oval.DrawColor();
-	else if (nChoice == 7)
-		holeoval.DrawColor();
+	drawShelfTop();
+	drawS_ShelfTop();
+	drawBase();
+	drawColumn();
+	drawRow();
+	drawS_ShelfBot();
+	drawShelfBot();
+	drawRotary();
+	drawRotaryPoint();
+	drawstandT();
+	drawrightT();
+	draws_standT();
+	draws_rightT();
+
 	glFlush();
-    glutSwapBuffers();
+	glutSwapBuffers();
 }
 
 void myInit()
@@ -790,42 +1267,59 @@ void myInit()
 	glLoadIdentity();
 	glOrtho(-fHalfSize, fHalfSize, -fHalfSize, fHalfSize, -1000, 1000);
 }
-void processTimer(int value) {
-	angle += (GLfloat)value;
-	if (angle > 360) angle = angle - 360.0f;
-	glutTimerFunc(25, processTimer, 1);
-	glutPostRedisplay();
-}
+
 int main(int argc, char* argv[])
 {
-	cout << "1. Tetrahedron" << endl;
-	cout << "2. Cube" << endl;
-	cout << "3. Cuboid" << endl;
-	cout << "4. Cylinder" << endl;
-	cout << "5. HoleCuboid" << endl;
-	cout << "6. Oval" << endl;
-	cout << "7. HoleOval" << endl;
-
-	cout << "Input the choice: " << endl;
-	cin  >> nChoice;
-
 	glutInit(&argc, (char**)argv); //initialize the tool kit
-	glutInitDisplayMode(GLUT_DOUBLE |GLUT_RGB | GLUT_DEPTH);//set the display mode
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);//set the display mode
 	glutInitWindowSize(screenWidth, screenHeight); //set window size
 	glutInitWindowPosition(100, 100); // set window position on screen
 	glutCreateWindow("Assignment1- Cao Phúc- 1512500"); // open the screen window
 
-	tetrahedron.CreateTetrahedron();
-	cube.CreateCube(1);
-	cuboid.CreateCuboid(2, 0.8, 0.8);
-	//cylinder.CreateCylinder(20, 3, 1);
-	holecuboid.CreateCubeHole(2, 0.8, 0.8, 0.35);
-	oval.CreateOval(2, 2, 0.8);
-//	holeoval.CreateHoleOval(2, 2, 0.8, 1);*/
+	base.CreateCylindrical(20, baseHeight, baseRadius);
+	base.SetColor(6);
+
+	column.CreateCuboid(columnSizeZ, columnSizeY, columnSizeZ);
+	column.SetColor(1);
+
+	row.CreateCuboid((columnSizeY - 0.2) * 2 / 3, columnSizeZ, columnSizeZ);
+	row.SetColor(0);
+
+	shelftop.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
+	shelftop.SetColor(6);
+
+	s_shelftop.CreateCuboid(columnSizeZ + baseHeight, columnSizeZ, columnSizeZ);
+	s_shelftop.SetColor(6);
+
+	s_shelfbot.CreateCuboid(baseHeight, columnSizeZ, columnSizeZ);
+	s_shelfbot.SetColor(6);
+
+	shelfbot.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
+	shelfbot.SetColor(6);
+
+	rotary.CreateOvan(columnSizeZ / 2, (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5, columnSizeZ / 3 + baseHeight);
+	rotary.SetColor(6);
+
+	rotarypoint.CreateCylindrical(20, columnSizeZ*(7.f / 3), baseHeight / 2);
+	rotarypoint.SetColor(4);
+
+	standT.CreateOvanHole(baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2) * 6 / 5, columnSizeX, baseHeight / 2);
+	standT.SetColor(0);
+
+	s_standT.CreateCuboid(columnSizeZ, columnSizeY * 3 / 5, columnSizeZ);
+	s_standT.SetColor(0);
+
+	rightT.CreateOvanHole(baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2) * 6 / 5, columnSizeX, baseHeight / 2);
+	rightT.SetColor(2);
+
+	s_rightT.CreateCuboid(columnSizeZ, columnSizeY * 3 / 5, columnSizeZ);
+	s_rightT.SetColor(2);
+
 	myInit();
-    glutDisplayFunc(myDisplay);
-	glutTimerFunc(25, processTimer, 1);
+
+	glutKeyboardFunc(myKeyboard);
+	glutDisplayFunc(myDisplay);
+
 	glutMainLoop();
 	return 0;
 }
-
