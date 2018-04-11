@@ -973,27 +973,57 @@ int		screenHeight = 600;
 
 bool	bWireFrame = false;
 
-float	baseRadius = 0.8;
+float	baseRadius = 1;
 float	baseHeight = 0.2;
-float	baseRotateStep = 5;
+float	baseRotateStep = 10;
 
 float	columnSizeX = 0.25;
 float	columnSizeZ = columnSizeX;
 float	columnSizeY = 5;
 
+float camera_angle;
+float camera_height ;
+float camera_dis ;
+float camera_X, camera_Y, camera_Z;
+float lookAt_X, lookAt_Y, lookAt_Z ;
+
+bool	b4View = false;
+bool	autoplay = false;
+
 Mesh	base;
 Mesh	column;
-Mesh	row;
-Mesh    shelftop;
-Mesh    shelfbot;
-Mesh    s_shelftop;
-Mesh    s_shelfbot;
-Mesh    rotary;
-Mesh    rotarypoint;
-Mesh    standT;
-Mesh	rightT;
-Mesh    s_standT;
-Mesh    s_rightT;
+Mesh	thanhngang;
+Mesh    giadotren;
+Mesh    giadoduoi;
+Mesh    giadotren_c;
+Mesh    giadoduoi_c;
+Mesh    trucquay;
+Mesh    diemquay;
+Mesh    ovandaylen;
+Mesh    thanhdaylen;
+Mesh	ovandayngang;
+Mesh    thangdayngang;
+
+
+void mySpecialKeyboard(int key, int x, int y) {
+	switch (key) {
+	case GLUT_KEY_UP:
+		camera_height += 0.5;
+		break;
+	case GLUT_KEY_DOWN:
+		camera_height -= 0.5;
+		break;
+	case GLUT_KEY_LEFT:
+		camera_angle += 10;
+		break;
+	case GLUT_KEY_RIGHT:
+		camera_angle -= 10;
+		break;
+	default:
+		break;
+	}
+	glutPostRedisplay();
+}
 
 void myKeyboard(unsigned char key, int x, int y)
 {
@@ -1010,23 +1040,41 @@ void myKeyboard(unsigned char key, int x, int y)
 			base.rotateY += 360;
 		break;
 	case '3':
-		rotary.rotateZ += baseRotateStep;
-		if (rotary.rotateZ > 360)
-			rotary.rotateZ -= 360;
+		trucquay.rotateZ += baseRotateStep;
+		if (trucquay.rotateZ > 360)
+			trucquay.rotateZ -= 360;
 		break;
 	case '4':
-		rotary.rotateZ -= baseRotateStep;
-		if (rotary.rotateZ < 0)
-			rotary.rotateZ += 360;
+		trucquay.rotateZ -= baseRotateStep;
+		if (trucquay.rotateZ < 0)
+			trucquay.rotateZ += 360;
+		break;
+	case 'A':
+	case 'a':
+		autoplay = !autoplay;
 		break;
 	case 'R':
 	case 'r':
 		base.rotateY = 0;
-		rotary.rotateZ = 0;
+		trucquay.rotateZ = 0;
 		break;
 	case 'W':
 	case 'w':
 		bWireFrame = !bWireFrame;
+		break;
+	case 'v':
+		b4View = !b4View;
+		break;
+	case 'V':
+		b4View = !b4View;
+		break;
+	case '+':
+		camera_dis += 0.5;
+		break;
+	case '-':
+		camera_dis -= 0.5;
+		break;
+	default:
 		break;
 	}
 
@@ -1078,180 +1126,215 @@ void drawColumn()
 
 	glPopMatrix();
 }
-void drawRow()
+void drawThanhngang()
 {
 	glPushMatrix();
-
 	glRotatef(base.rotateY, 0, 1, 0);
-	glTranslated(columnSizeY / 3 + columnSizeX / 2 - 0.1 * 2 / 3, columnSizeY * 3 / 10 + columnSizeX / 2, 0);
-
+	glTranslated(columnSizeY/3 + columnSizeX/2 , columnSizeY * 4 / 12 , 0);
 	if (bWireFrame)
-		row.DrawWireframe();
+		thanhngang.DrawWireframe();
 	else
-		row.DrawColor();
-
+		thanhngang.DrawColor();
 	glPopMatrix();
 }
-void drawShelfTop() {
-	glPushMatrix();
-
-	glRotatef(base.rotateY - 90, 0, 1, 0);
-	glTranslated(columnSizeX * 1 / 3 + columnSizeX * 2 + baseHeight, columnSizeY * 11 / 16 + columnSizeX / 2, 0);
-
-	if (bWireFrame)
-		shelftop.DrawWireframe();
-	else
-		shelftop.DrawColor();
-
-	glPopMatrix();
-}
-void drawS_ShelfTop() {
-	glPushMatrix();
-	glRotatef(base.rotateY - 90, 0, 1, 0);
-	glTranslated((columnSizeX * 2 + baseHeight) / 2, columnSizeY * 11 / 16 + columnSizeX / 2, 0);
-
-	if (bWireFrame)
-		s_shelftop.DrawWireframe();
-	else
-		s_shelftop.DrawColor();
-
-	glPopMatrix();
-}
-void drawS_ShelfBot() {
-	glPushMatrix();
-	glRotatef(base.rotateY - 90, 0, 1, 0);
-	glTranslated(columnSizeZ - (columnSizeX - baseHeight) / 2, columnSizeY * 3 / 10 + columnSizeX / 2, -columnSizeY * 0.39);
-
-	if (bWireFrame)
-		s_shelfbot.DrawWireframe();
-	else
-		s_shelfbot.DrawColor();
-
-	glPopMatrix();
-}
-void drawShelfBot() {
+void drawGiadoduoi() {
 	glPushMatrix();
 	glRotatef(base.rotateY - 90, 0, 1, 0);
 	glTranslated(columnSizeZ + baseHeight + columnSizeZ * 1 / 3, columnSizeY * 3 / 10 + columnSizeX / 2, -columnSizeY * 0.39);
 	glRotatef(90, 1, 0, 0);
 
 	if (bWireFrame)
-		shelfbot.DrawWireframe();
+		giadoduoi.DrawWireframe();
 	else
-		shelfbot.DrawColor();
+		giadoduoi.DrawColor();
 
 	glPopMatrix();
 }
-void drawRotary() {
+void drawGiadoduoi_c() {
+	glPushMatrix();
+	glRotatef(base.rotateY - 90, 0, 1, 0);
+	glTranslated(columnSizeZ - (columnSizeX - baseHeight) / 2, columnSizeY * 3 / 10 + columnSizeX / 2, -columnSizeY * 0.39);
+
+	if (bWireFrame)
+		giadoduoi_c.DrawWireframe();
+	else
+		giadoduoi_c.DrawColor();
+
+	glPopMatrix();
+}
+void drawGiadotren() {
+	glPushMatrix();
+
+	glRotatef(base.rotateY - 90, 0, 1, 0);
+	glTranslated(columnSizeX * 1 / 3 + columnSizeX * 2 + baseHeight, columnSizeY * 11 / 16 + columnSizeX / 2, 0);
+
+	if (bWireFrame)
+		giadotren.DrawWireframe();
+	else
+		giadotren.DrawColor();
+
+	glPopMatrix();
+}
+
+void drawGiadotren_c() {
+	glPushMatrix();
+	glRotatef(base.rotateY - 90, 0, 1, 0);
+	glTranslated((columnSizeX * 2 + baseHeight) / 2, columnSizeY * 11 / 16 + columnSizeX / 2, 0);
+
+	if (bWireFrame)
+		giadotren_c.DrawWireframe();
+	else
+		giadotren_c.DrawColor();
+
+	glPopMatrix();
+}
+void drawTrucquay() {
 	glPushMatrix();
 	glRotatef(base.rotateY, 0, 1, 0);
 	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) / 2 + columnSizeX / 2);
 	glRotatef(90, 1, 0, 0);
-	glRotatef(rotary.rotateZ, 0, 1, 0);		// quanh truc
+	glRotatef(trucquay.rotateZ, 0, 1, 0);		// quanh truc
 	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 10, 0, 0);
 
 	if (bWireFrame)
-		rotary.DrawWireframe();
+		trucquay.DrawWireframe();
 	else
-		rotary.DrawColor();
+		trucquay.DrawColor();
 
 	glPopMatrix();
 }
-void drawRotaryPoint() {
+void drawDiemquay() {
 	glPushMatrix();
 	glRotatef(base.rotateY, 0, 1, 0);
 	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX / 2 + columnSizeZ * (7.f / 3) / 2);
 	glRotatef(90, 1, 0, 0);
-	glRotatef(rotary.rotateZ, 0, 1, 0);		// quanh truc
+	glRotatef(trucquay.rotateZ, 0, 1, 0);		// quanh truc
 	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5, 0, 0);
 
 	if (bWireFrame)
-		rotarypoint.DrawWireframe();
+		diemquay.DrawWireframe();
 	else
-		rotarypoint.DrawColor();
+		diemquay.DrawColor();
 
 	glPopMatrix();
 }
-void drawstandT() {
+void drawOvandaylen() {
 	glPushMatrix();
 	glRotatef(base.rotateY, 0, 1, 0);
-	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * sin(rotary.rotateZ*DEG2RAD) + (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX * 2);
+	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * sin(trucquay.rotateZ*DEG2RAD) + (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX * 2);
 	glRotatef(90, 1, 0, 0);
 
 	if (bWireFrame)
-		standT.DrawWireframe();
+		ovandaylen.DrawWireframe();
 	else
-		standT.DrawColor();
+		ovandaylen.DrawColor();
 
 	glPopMatrix();
 }
-void drawrightT() {
+void drawOvandayngang() {
 	glPushMatrix();
 	glRotatef(base.rotateY, 0, 1, 0);
-	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * cos(rotary.rotateZ*DEG2RAD), (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX);
+	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * cos(trucquay.rotateZ*DEG2RAD), (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX);
 	glRotatef(90, 0, 0, 1);
 	glRotatef(90, 1, 0, 0);
 
 	if (bWireFrame)
-		rightT.DrawWireframe();
+		ovandayngang.DrawWireframe();
 	else
-		rightT.DrawColor();
+		ovandayngang.DrawColor();
 
 	glPopMatrix();
 }
-void draws_standT()
+void drawThanhdaylen()
 {
 	glPushMatrix();
 	glRotatef(base.rotateY, 0, 1, 0);
-	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2) + baseHeight + (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * sin(rotary.rotateZ*DEG2RAD) + columnSizeY * 3 / 10, (columnSizeZ / 3 + baseHeight) + columnSizeX * 2);
+	glTranslated(0, (columnSizeY * 3 / 10 + columnSizeX / 2) + baseHeight + (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * sin(trucquay.rotateZ*DEG2RAD) + columnSizeY * 3 / 10, (columnSizeZ / 3 + baseHeight) + columnSizeX * 2);
 
 	if (bWireFrame)
-		s_standT.DrawWireframe();
+		thanhdaylen.DrawWireframe();
 	else
-		s_standT.DrawColor();
+		thanhdaylen.DrawColor();
 
 	glPopMatrix();
 }
-void draws_rightT()
+void drawThanhdayngang()
 {
 	glPushMatrix();
 	glRotatef(base.rotateY, 0, 1, 0);
-	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * cos(rotary.rotateZ*DEG2RAD) + columnSizeY * 3 / 10 + baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX);
+	glTranslated((columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5 * cos(trucquay.rotateZ*DEG2RAD) + columnSizeY * 3 / 10 + baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2), (columnSizeZ / 3 + baseHeight) + columnSizeX);
 	glRotatef(90, 0, 0, 1);
 
 	if (bWireFrame)
-		s_rightT.DrawWireframe();
+		thangdayngang.DrawWireframe();
 	else
-		s_rightT.DrawColor();
+		thangdayngang.DrawColor();
 
 	glPopMatrix();
+}
+void drawAllShape(){
+	
+	drawAxis();
+	drawBase();
+	drawColumn();
+	drawThanhngang();
+	drawGiadotren();
+	drawGiadoduoi();
+	drawGiadotren_c();
+	drawGiadoduoi_c();
+	drawTrucquay();
+	drawDiemquay();
+	drawOvandaylen();
+	drawOvandayngang();
+	drawThanhdaylen();
+	drawThanhdayngang();
 }
 void myDisplay()
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(6, 4, 6, 0, 1, 0, 0, 1, 0);
-
+	//gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, 0, 1, 0);
+	
+	camera_X = camera_dis * sinf(camera_angle*DEG2RAD);
+	camera_Y = camera_height;
+	camera_Z = camera_dis * cosf(camera_angle*DEG2RAD);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, screenWidth, screenHeight);
 
-	drawAxis();
-	drawShelfTop();
-	drawS_ShelfTop();
-	drawBase();
-	drawColumn();
-	drawRow();
-	drawS_ShelfBot();
-	drawShelfBot();
-	drawRotary();
-	drawRotaryPoint();
-	drawstandT();
-	drawrightT();
-	draws_standT();
-	draws_rightT();
+
+	if (b4View) {
+		glViewport(0, 0, screenWidth / 2, screenHeight / 2);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		gluLookAt(6, 0, 0, 0, 0, 0, 0, 1, 0);
+		drawAllShape();
+
+		glViewport(screenWidth / 2, 0, screenWidth / 2, screenHeight / 2);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		gluLookAt(0, 6, 0, 0, 0, 0, 0, 0, -1);
+		drawAllShape();
+
+		glViewport(screenWidth / 2, screenHeight / 2, screenWidth / 2, screenHeight / 2);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		gluLookAt(0, 0, 6, 0, 0, 0, 0, 1, 0);
+		drawAllShape();
+
+		glViewport(0, screenHeight / 2, screenWidth / 2, screenHeight / 2);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, 0, 1, 0);
+		drawAllShape();
+	}
+	else {
+		glViewport(0, 0, screenWidth, screenHeight);
+		gluLookAt(camera_X, camera_Y, camera_Z, lookAt_X, lookAt_Y, lookAt_Z, 0, 1, 0);
+		drawAllShape();
+	}
 
 	glFlush();
 	glutSwapBuffers();
+
 }
 
 void myInit()
@@ -1265,7 +1348,29 @@ void myInit()
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-fHalfSize, fHalfSize, -fHalfSize, fHalfSize, -1000, 1000);
+	
+	glFrustum(-2.0, 2.0, -2.0, 2.0, 2.0, 100);
+	glMatrixMode(GL_MODELVIEW);
+	//Khởi tạo giá trị mặc định cho camera
+	camera_angle = 45;
+	camera_height = 2.4;
+	camera_dis = 6.5;
+	lookAt_X = 0;
+	lookAt_Y = 1;
+	lookAt_Z = 0; 
+}
+
+void processTimer(int value){
+	if(autoplay){
+		base.rotateY += 5;
+		if (base.rotateY < 360)
+			base.rotateY -= 360;
+		trucquay.rotateZ -= 5;
+		if (trucquay.rotateZ < 0)
+				trucquay.rotateZ += 360;
+	}
+	glutTimerFunc(100, processTimer, value);
+	glutPostRedisplay();
 }
 
 int main(int argc, char* argv[])
@@ -1282,42 +1387,44 @@ int main(int argc, char* argv[])
 	column.CreateCuboid(columnSizeZ, columnSizeY, columnSizeZ);
 	column.SetColor(1);
 
-	row.CreateCuboid((columnSizeY - 0.2) * 2 / 3, columnSizeZ, columnSizeZ);
-	row.SetColor(0);
+	thanhngang.CreateCuboid(columnSizeY* 2 / 3, columnSizeZ, columnSizeZ);
+	thanhngang.SetColor(0);
+	
+	giadoduoi.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
+	giadoduoi.SetColor(6);
 
-	shelftop.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
-	shelftop.SetColor(6);
 
-	s_shelftop.CreateCuboid(columnSizeZ + baseHeight, columnSizeZ, columnSizeZ);
-	s_shelftop.SetColor(6);
+	giadoduoi_c.CreateCuboid(baseHeight, columnSizeZ, columnSizeZ);
+	giadoduoi_c.SetColor(6);
+	
+	giadotren.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
+	giadotren.SetColor(6);
+	
+	giadotren_c.CreateCuboid(columnSizeZ + baseHeight, columnSizeZ, columnSizeZ);
+	giadotren_c.SetColor(6);
 
-	s_shelfbot.CreateCuboid(baseHeight, columnSizeZ, columnSizeZ);
-	s_shelfbot.SetColor(6);
+	trucquay.CreateOvan(columnSizeZ / 2, (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5, columnSizeZ / 3 + baseHeight);
+	trucquay.SetColor(6);
 
-	shelfbot.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
-	shelfbot.SetColor(6);
+	diemquay.CreateCylindrical(20, columnSizeZ*(7.f / 3), baseHeight / 2);
+	diemquay.SetColor(4);
 
-	rotary.CreateOvan(columnSizeZ / 2, (columnSizeY * 3 / 10 + columnSizeX / 2) * 3 / 5, columnSizeZ / 3 + baseHeight);
-	rotary.SetColor(6);
+	ovandaylen.CreateOvanHole(baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2) * 6 / 5, columnSizeX, baseHeight / 2);
+	ovandaylen.SetColor(0);
 
-	rotarypoint.CreateCylindrical(20, columnSizeZ*(7.f / 3), baseHeight / 2);
-	rotarypoint.SetColor(4);
+	thanhdaylen.CreateCuboid(columnSizeZ, columnSizeY * 3 / 5, columnSizeZ);
+	thanhdaylen.SetColor(0);
 
-	standT.CreateOvanHole(baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2) * 6 / 5, columnSizeX, baseHeight / 2);
-	standT.SetColor(0);
+	ovandayngang.CreateOvanHole(baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2) * 6 / 5, columnSizeX, baseHeight / 2);
+	ovandayngang.SetColor(2);
 
-	s_standT.CreateCuboid(columnSizeZ, columnSizeY * 3 / 5, columnSizeZ);
-	s_standT.SetColor(0);
-
-	rightT.CreateOvanHole(baseHeight, (columnSizeY * 3 / 10 + columnSizeX / 2) * 6 / 5, columnSizeX, baseHeight / 2);
-	rightT.SetColor(2);
-
-	s_rightT.CreateCuboid(columnSizeZ, columnSizeY * 3 / 5, columnSizeZ);
-	s_rightT.SetColor(2);
+	thangdayngang.CreateCuboid(columnSizeZ, columnSizeY * 3 / 5, columnSizeZ);
+	thangdayngang.SetColor(2);
 
 	myInit();
-
+	glutTimerFunc(100, processTimer, 10);
 	glutKeyboardFunc(myKeyboard);
+	glutSpecialFunc(mySpecialKeyboard);
 	glutDisplayFunc(myDisplay);
 
 	glutMainLoop();
