@@ -1079,7 +1079,7 @@ void drawColumn()
 void drawGiadoduoi_c() {
 	glPushMatrix();
 	glRotatef(base.rotateY - 90, 0, 1, 0);
-	glTranslated(0.225, 1.62, -1.95);
+	glTranslated(0.22, 1.62, -1.95);
 
 	if (bWireFrame)
 		giadoduoi_c.DrawWireframe();
@@ -1105,7 +1105,7 @@ void drawGiadotren() {
 void drawTrucquay() {
 	glPushMatrix();
 	glRotatef(base.rotateY, 0, 1, 0);
-	glTranslated(0, 1.62, 0.266);
+	glTranslated(0, 1.62, 0.26);
 	glRotatef(90, 1, 0, 0);
 	glRotatef(trucquay.rotateZ, 0, 1, 0);		// quanh truc
 	glTranslated(0.487, 0, 0);
@@ -1234,19 +1234,19 @@ void myDisplay()
 		glViewport(0, 0, screenWidth / 2, screenHeight / 2);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		gluLookAt(6, 0, 0, 0, 0, 0, 0, 1, 0);
+		gluLookAt(0, 0, 6, 0, 0, 0, 0, 1, 0);
 		drawAllShape();
 
 		glViewport(screenWidth / 2, 0, screenWidth / 2, screenHeight / 2);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		gluLookAt(0, 6, 0, 0, 0, 0, 0, 0, -1);
+		gluLookAt(0, 6, 0, 0, 0, 0, 0, 0, 1);
 		drawAllShape();
 
 		glViewport(screenWidth / 2, screenHeight / 2, screenWidth / 2, screenHeight / 2);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		gluLookAt(0, 0, 6, 0, 0, 0, 0, 1, 0);
+		gluLookAt(6, 0, 0, 0, 0, 0, 0, 1, 0);
 		drawAllShape();
 
 		glViewport(0, screenHeight / 2, screenWidth / 2, screenHeight / 2);
@@ -1381,7 +1381,7 @@ int main(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);//set the display mode
 	glutInitWindowSize(screenWidth, screenHeight); //set window size
 	glutInitWindowPosition(100, 100); // set window position on screen
-	glutCreateWindow("Assignment1- Cao Phúc- 1512500"); // open the screen window
+	glutCreateWindow("Cao Phúc- 1512500"); // open the screen window
 
 	base.CreateCylindrical(20, baseHeight, baseRadius);
 	base.SetColor(1);
@@ -1392,14 +1392,14 @@ int main(int argc, char* argv[])
 	thanhngang.CreateCuboid(columnSizeY* 2 / 3, columnSizeZ, columnSizeZ);
 	thanhngang.SetColor(3);
 	
-	giadoduoi.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
+	giadoduoi.CreateCubeHole(columnSizeZ * 4 / 6, columnSizeZ * 4 / 6, columnSizeZ * 4 / 6, columnSizeZ / 3);
 	giadoduoi.SetColor(4);
 
 
 	giadoduoi_c.CreateCuboid(baseHeight, columnSizeZ, columnSizeZ);
 	giadoduoi_c.SetColor(4);
 	
-	giadotren.CreateCubeHole(columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ * 5 / 6, columnSizeZ / 3);
+	giadotren.CreateCubeHole(columnSizeZ * 4 / 6, columnSizeZ * 4 / 6, columnSizeZ * 4 / 6, columnSizeZ / 3);
 	giadotren.SetColor(5);
 	
 	giadotren_c.CreateCuboid(columnSizeZ + baseHeight, columnSizeZ, columnSizeZ);

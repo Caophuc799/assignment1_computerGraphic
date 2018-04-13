@@ -1,4 +1,4 @@
-﻿Build started 4/11/2018 5:46:10 PM.
+﻿Build started 4/13/2018 9:27:25 PM.
      1>Project "E:\Code\C, C++\assignment1\assignment1\assignment1.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\assignment1.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -19,4 +19,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.65
+Time Elapsed 00:00:01.60
